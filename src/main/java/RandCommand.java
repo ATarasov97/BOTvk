@@ -4,7 +4,7 @@ import java.util.Random;
 import com.petersamokhin.bots.sdk.clients.Group;
 import com.petersamokhin.bots.sdk.objects.Message;
 
-public class RandCommand extends AbstractCommand{
+class RandCommand extends AbstractCommand{
     private final String COMMAND = "/rand";
     private final String HELP = "/rand {word}";
 
@@ -15,10 +15,11 @@ public class RandCommand extends AbstractCommand{
     @Override
     void start(Group group) {
         group.onCommand(COMMAND, message -> {
-            String input = message.getText().substring(COMMAND.length() + 1);
-            if (input.length() == 0) {
+            String input = message.getText();
+            if (input.length() == COMMAND.length()) {
                 sendHelpMessage(group, message);
             } else {
+                input = input.substring(COMMAND.length() + 1);
                 UrbanDictionaryAPI udAPI = null;
                 try {
                     udAPI = new UrbanDictionaryAPI(input);
