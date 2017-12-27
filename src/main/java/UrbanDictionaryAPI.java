@@ -17,8 +17,8 @@ public class UrbanDictionaryAPI {
     UrbanDictionaryAPI(String search) throws UnsupportedEncodingException {
         JSONObject response = new JSONObject(callURL(URBAN_DICT_API + URLEncoder.encode(String.join(" ", search),"UTF-8")));
         JSONArray definitionsJSON = response.getJSONArray("list");
-        this.definitions = new Definition[definitionsJSON.length()];
-        for (int i = 0; i < definitionsJSON.length(); i++) {
+        this.definitions = new Definition[(definitionsJSON.length() > 5) ? 5 : definitionsJSON.length()];
+        for (int i = 0; i < definitions.length; i++) {
             this.definitions[i] = new Definition(definitionsJSON.getJSONObject(i).getString("definition"),
                     definitionsJSON.getJSONObject(i).getString("word"),
                     definitionsJSON.getJSONObject(i).getString("author"));
