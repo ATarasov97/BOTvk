@@ -12,6 +12,7 @@ class DefCommand extends AbstractCommand {
 
     private final String COMMAND = "/def";
     private final String HELP = "/def {word}";
+    private final String NOT_FOUND = "0 definitions found";
 
     DefCommand() {
         super.COMMAND = this.COMMAND;
@@ -36,7 +37,7 @@ class DefCommand extends AbstractCommand {
                 } else {
                     UrbanDictionaryAPI.Definition[] definitions = udAPI.getDefinitions();
                     if (definitions.length == 0) {
-                        sendHelpMessage(group, message);
+                        sendNotFoundMessage(group, message);
                     }
                     StringBuilder sendMessage = new StringBuilder();
                     for (UrbanDictionaryAPI.Definition definition : definitions) {
@@ -59,6 +60,14 @@ class DefCommand extends AbstractCommand {
                 .from(group)
                 .to(message.authorId())
                 .text(HELP)
+                .send();
+    }
+
+    private void sendNotFoundMessage(Group group, Message message) {
+        new Message()
+                .from(group)
+                .to(message.authorId())
+                .text(NOT_FOUND)
                 .send();
     }
 
