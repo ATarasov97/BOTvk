@@ -1,11 +1,15 @@
-import com.petersamokhin.bots.sdk.clients.Group;
 
 abstract class AbstractCommand {
     String COMMAND = null;
 
-    abstract void start(Group group);
+    abstract String execute(String input);
 
-    String getCommand() {
+    public String getCommand() {
         return COMMAND;
     }
+
+    public boolean matches(String args) {
+        return args.startsWith(getCommand());
+    }
+
 }

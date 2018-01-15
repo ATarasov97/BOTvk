@@ -1,10 +1,7 @@
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.petersamokhin.bots.sdk.clients.Group;
-import com.petersamokhin.bots.sdk.objects.Message;
 
 class DefCommand extends AbstractCommand {
 
@@ -13,62 +10,37 @@ class DefCommand extends AbstractCommand {
     private final String COMMAND = "/def";
     private final String HELP = "/def {word}";
     private final String NOT_FOUND = "0 definitions found";
+    private final UrbanDictionaryAPI udAPI;
 
-    DefCommand() {
+
+    public DefCommand(UrbanDictionaryAPI udAPI) {
         super.COMMAND = this.COMMAND;
+        this.udAPI = udAPI;
     }
 
     @Override
-    void start(Group group) {
-        group.onCommand(COMMAND, message -> {
-            String input = message.getText();
-            if (input.length() == COMMAND.length()) {
-                sendHelpMessage(group, message);
-            } else {
-                input = input.substring(COMMAND.length() + 1);
-                UrbanDictionaryAPI udAPI = null;
-                try {
-                    udAPI = new UrbanDictionaryAPI(input);
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                if (udAPI == null) {
-                    sendHelpMessage(group, message);
-                } else {
-                    UrbanDictionaryAPI.Definition[] definitions = udAPI.getDefinitions();
-                    if (definitions.length == 0) {
-                        sendNotFoundMessage(group, message);
-                    }
-                    StringBuilder sendMessage = new StringBuilder();
-                    for (UrbanDictionaryAPI.Definition definition : definitions) {
-                        sendMessage.append(definition.word).append("\n")
-                                .append("From: ").append(definition.author).append("\n")
-                                .append(definition.body).append("\n\n\n");
-                    }
-                    new Message()
-                            .from(group)
-                            .to(message.authorId())
-                            .text(sendMessage)
-                            .send();
-                }
+    public String execute(String input) {
+        if (input.length() == COMMAND.length()) {
+            return HELP;
+        } else {
+            input = input.substring(COMMAND.length() + 1);
+            UrbanDictionaryAPI.Definition[] definitions = null;
+            try {
+                definitions = udAPI.call(input);
+            } catch (IOException e) {
+                log.error(e + " occurred in API call");
             }
-        });
+            if ((definitions == null) || (definitions.length == 0)) {
+                return NOT_FOUND;
+            } else {
+                StringBuilder sendMessage = new StringBuilder();
+                for (UrbanDictionaryAPI.Definition definition : definitions) {
+                    sendMessage.append(definition.word).append("\n")
+                            .append("From: ").append(definition.author).append("\n")
+                            .append(definition.body).append("\n\n\n");
+                }
+                return new String(sendMessage);
+            }
+        }
     }
-
-    private void sendHelpMessage(Group group, Message message) {
-        new Message()
-                .from(group)
-                .to(message.authorId())
-                .text(HELP)
-                .send();
-    }
-
-    private void sendNotFoundMessage(Group group, Message message) {
-        new Message()
-                .from(group)
-                .to(message.authorId())
-                .text(NOT_FOUND)
-                .send();
-    }
-
 }

@@ -6,8 +6,8 @@ import com.petersamokhin.bots.sdk.objects.Message;
 
 public class DefinitionBot {
 
-    private final String WRONG_MESSAGE = "Try /help";
     private final Group group;
+    private UrbanDictionaryAPI udAPI = new UrbanDictionaryAPI();
     private ArrayList<AbstractCommand> commands = new ArrayList<>();
 
     DefinitionBot(Integer groupId, String accessToken) {
@@ -15,33 +15,23 @@ public class DefinitionBot {
     }
 
     public void start() {
-        commands.add(new DefCommand());
-        commands.add(new RandCommand());
+        commands.add(new DefCommand(udAPI));
+        commands.add(new RandCommand(udAPI));
         commands.add(new HelpCommand());
-        for (AbstractCommand command : commands) {
-            command.start(group);
-        }
-        startWrongInputCallback();
-    }
-
-    private void startWrongInputCallback() {
         group.onMessage(message -> {
-            String messageText = message.getText();
-            boolean isWrong = true;
+            String sendText = null;
+            String input = message.getText();
             for (AbstractCommand command : commands) {
-                if (messageText.equals(command.getCommand())) {
-                    isWrong = false;
+                if (command.matches(input)) {
+                    sendText = command.execute(input);
                     break;
                 }
             }
-            if (isWrong) {
-                new Message()
-                        .from(group)
-                        .to(message.authorId())
-                        .text(WRONG_MESSAGE)
-                        .send();
-            }
+            new Message()
+                    .from(group)
+                    .to(message.authorId())
+                    .text(sendText)
+                    .send();
         });
     }
-
 }
