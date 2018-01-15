@@ -39,7 +39,7 @@ class DefCommand extends AbstractCommand {
                             .append("From: ").append(definition.author).append("\n")
                             .append(definition.body).append("\n\n\n");
                 }
-                return new String(sendMessage);
+                return sendMessage.toString();
             }
         }
     }

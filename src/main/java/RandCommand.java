@@ -40,7 +40,7 @@ class RandCommand extends AbstractCommand {
                 sendMessage.append(definitions[index].word).append("\n")
                         .append("From: ").append(definitions[index].author).append("\n")
                         .append(definitions[index].body);
-                return new String(sendMessage);
+                return sendMessage.toString();
             }
         }
     }
